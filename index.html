@@ -55,7 +55,7 @@
 							<li>Ajouter, Modifier, Supprimer un quiz</li>
 							<li>Ajouter, Modifier, Supprimer les questions et reponses d'un quiz</li>
 							<li>Passer un quiz et afficher le score de chaque utilisateur</li>
-							<li>Afficher une alerte rouge si le score inférieur à 8, alerte en jaune si le score entre 8 et 12, en bleu si le score entre 12 et 18 et en vert si supé</li>
+							<li>Afficher une alerte rouge si le score inférieur à 8, alerte en jaune si le score entre 8 et 12, en bleu si le score entre 12 et 18 et en vert si supérieur à 18</li>
 						</ul>
 					</p>
 				</section>
@@ -92,7 +92,7 @@
 				</section>
 
 				<section>
-					<h2>Dans cette application on a utilisé 3 controleurs</h2>
+					<h2>Dans cette application on a utilisé 2 controleurs</h2>
 					<p>
 						<ul>
 							<li>QuizController</li>
@@ -300,13 +300,13 @@
 					<script type="text/template">
 						## HomeController
 						<br>
-						<section >
+						<section>
 							<pre>
 								<code>
 									private quizDBContainer db = new quizDBContainer();
 									       public ActionResult Index()
 									       {
-									          List<string> list = db.QuizSet.Select(quiz => quiz.thematic).Distinct().ToList();
+									          List <string> list = db.QuizSet.Select(quiz => quiz.thematic).Distinct().ToList();
 
 									           return View(list);
 									       }
