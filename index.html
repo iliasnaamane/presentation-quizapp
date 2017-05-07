@@ -1,13 +1,21 @@
 <!doctype html>
-<html>
+<html lang="en">
+
 	<head>
 		<meta charset="utf-8">
+
+		<title>Quiz App Presentation</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
-
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
@@ -20,30 +28,445 @@
 			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
 			document.getElementsByTagName( 'head' )[0].appendChild( link );
 		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
 	</head>
+
 	<body>
+
 		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+				<section>
+					<h1>Quiz Application</h1>
+					<h3>ASP .Net MVC 5 and Entity Framework</h3>
+					<p>
+						<small>Created by <a href="http://naamane.me">Naamane Ilias</a> / <a href="#">Basma El Guaabouri</a> / <a href="#">Mehdi Regragui</a>/ <a href="#">Charif Roudali</a> </small>
+					</p>
+				</section>
+
+				<section>
+					<h2> Notre Application permet de: </h2>
+					<p>
+						<ul>
+							<li>Ajouter, Modifier, Supprimer un quiz</li>
+							<li>Ajouter, Modifier, Supprimer les questions et reponses d'un quiz</li>
+							<li>Passer un quiz et afficher le score de chaque utilisateur</li>
+							<li>Afficher une alerte rouge si le score inférieur à 8, alerte en jaune si le score entre 8 et 12, en bleu si le score entre 12 et 18 et en vert si supé</li>
+						</ul>
+					</p>
+				</section>
+
+	
+					<section>
+						<h2>Technologies used</h2>
+						<p>
+							<ul>
+								<li>Entity Framework</li>
+								<li>ASP .NET MVC 5</li>
+								<li>AJAX/JQuery</li>
+								<li>Bootstrap/CSS/HTML5</li>
+							</ul>
+						</p>
+						
+						</a>
+					</section>
+					<section>
+						<h2>Model Container de l'application</h2>
+						<p><img data-src="conception.png" height="400" alt=""></p>
+					</section>
+					
+				<section>
+					<h2>Dossiers utilisés</h2>
+					<p>
+						<ul>
+							<li>Scripts qui contient les fichier Javascript (Jquery)</li>
+							<li>Views qui contient les Vues du projets</li>
+							<li>Controllers qui lient les données avec les vues</li>
+							<li>Content qui contient les fichiers CSS du projet</li>
+						</ul>
+					</p>
+				</section>
+
+				<section>
+					<h2>Dans cette application on a utilisé 3 controleurs</h2>
+					<p>
+						<ul>
+							<li>QuizController</li>
+							<li>HomeController</li>
+						</ul>
+					</p>
+				
+					
+				</section>
+				
+				<section data-markdown>
+					<script type="text/template">
+						## QuizController
+						<br>
+						<section >
+							<pre>
+								<code>
+									private quizDBContainer db = new quizDBContainer();
+
+									       // GET: Quizs
+									       public ActionResult Index(string theme )
+									       {
+									          
+									           return View(db.QuizSet.Where(quiz => quiz.thematic == theme).ToList());
+									       }
+
+									       public ActionResult CreateQuestion(int id)
+									       {
+
+									           return View();
+									       }
+
+									       [HttpPost]
+									       [ValidateAntiForgeryToken]
+									       public ActionResult CreateQuestion(int id,FormCollection fc)
+									       {
+									           Questions q = new Questions();
+									           q.question = fc["Questions.question"];
+									           Quiz quiz = db.QuizSet.Find(id);
+									           q.Quiz = quiz;
+									           Answers a = new Answers();
+									           a.name = fc["answer"];
+									           a.status = 1;
+									           a.Questions = q;
+									           q.Answers.Add(a);
+									           for(int i = 0; i < 3; i++)
+									           {
+									               Answers a1 = new Answers();
+									               a1.name = fc["answer_" + i];
+									               a1.status = 0;
+									               a1.Questions = q;
+									               q.Answers.Add(a1);
+									               db.AnswersSet.Add(a1);
+									           }
+									           db.QuestionsSet.Add(q);
+									           
+									          
+									           db.SaveChanges();
+									           return RedirectToAction("Edit","Quiz",new { Id = id });
+									       }
+
+									       // GET: Quizs/Details/5
+									       public ActionResult Details(int? id)
+									       {
+									           if (id == null)
+									           {
+									               return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+									           }
+									           Quiz quiz = db.QuizSet.Find(id);
+									           if (quiz == null)
+									           {
+									               return HttpNotFound();
+									           }
+									           return View(quiz);
+									       }
+
+									       // GET: Quizs/Create
+									       public ActionResult Create()
+									       {
+									           return View();
+									       }
+
+									       // POST: Quizs/Create
+									       // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+									       // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+									       [HttpPost]
+									       [ValidateAntiForgeryToken]
+									       public ActionResult Create([Bind(Include = "Id,name,thematic")] Quiz quiz)
+									       {
+									           if (ModelState.IsValid)
+									           {
+									               db.QuizSet.Add(quiz);
+									               db.SaveChanges();
+									               return RedirectToAction("Index","Home",null);
+									           }
+
+									           return View(quiz);
+									       }
+
+									       // GET: Quizs/Edit/5
+									       public ActionResult Edit(int? id)
+									       {
+									           if (id == null)
+									           {
+									               return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+									           }
+									           Quiz quiz = db.QuizSet.Find(id);
+									           if (quiz == null)
+									           {
+									               return HttpNotFound();
+									           }
+									           ViewBag.quizName = quiz.name;
+									           ViewBag.quizId = id;
+									           var model = db.QuestionsSet.Join(db.AnswersSet, q => q.Id, a => a.Id,
+									                (questions, answers) => new QuestionsAnswers { Questions = questions, Answers = answers }).Where(x => x.Answers.status == 1).
+									                ToList();
+									           return View(model);
+									       }
+
+									       // POST: Quizs/Edit/5
+									       // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+									       // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+									       [HttpPost]
+									       [ValidateAntiForgeryToken]
+									       public ActionResult Edit([Bind(Include = "Id,name,thematic")] Quiz quiz)
+									       {
+									           if (ModelState.IsValid)
+									           {
+									               db.Entry(quiz).State = EntityState.Modified;
+									               db.SaveChanges();
+									               return RedirectToAction("Index");
+									           }
+									           return View(quiz);
+									       }
+
+									       // GET: Quizs/Delete/5
+									       public ActionResult Delete(int? id)
+									       {
+									           if (id == null)
+									           {
+									               return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+									           }
+									           Quiz quiz = db.QuizSet.Find(id);
+									           if (quiz == null)
+									           {
+									               return HttpNotFound();
+									           }
+									           return View(quiz);
+									       }
+
+									       // POST: Quizs/Delete/5
+									       [HttpPost, ActionName("Delete")]
+									       [ValidateAntiForgeryToken]
+									       public ActionResult DeleteConfirmed(int id)
+									       {
+									           Quiz quiz = db.QuizSet.Find(id);
+									           db.QuizSet.Remove(quiz);
+									           db.QuestionsSet.RemoveRange(db.QuestionsSet.Where(q => q.Quiz.Id == id));
+									           List<Questions> L = db.QuestionsSet.Where(q => q.Quiz.Id == id).ToList();
+									           foreach(Questions q in L)
+									           {
+									               db.AnswersSet.RemoveRange(db.AnswersSet.Where(a => a.Questions.Id == q.Id));
+									           }
+									           
+									           db.SaveChanges();
+									           return RedirectToAction("Index");
+									       }
+
+									       protected override void Dispose(bool disposing)
+									       {
+									           if (disposing)
+									           {
+									               db.Dispose();
+									           }
+									           base.Dispose(disposing);
+									       }
+
+									       public ActionResult Test(int id)
+									       {
+									           Questions ques = db.QuestionsSet.Where(q => q.Quiz.Id == id).OrderByDescending(q => q.Id).FirstOrDefault();
+									           if (ques == null) 
+									               return RedirectToAction("Edit", new {  Id = id});
+									           ViewBag.Question = ques;
+									           return View();
+									       }
+
+									      
+									       public ActionResult getQuestion(scoreInfo qs)
+									       {
+									            
+									           Questions ques = db.QuestionsSet.Where(q => q.Quiz.Id == qs.quizId).OrderByDescending(q => q.Id).Skip(qs.step).FirstOrDefault();
+									           ViewBag.Question = ques;
+									           return View();
+									       }
+								</code>
+							</pre>
+						  
+						<p> QuizController contient toutes les methodes CRUD du quiz ainsi que la methode pour passer un test </p>
+
+						</section>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+						## HomeController
+						<br>
+						<section >
+							<pre>
+								<code>
+									private quizDBContainer db = new quizDBContainer();
+									       public ActionResult Index()
+									       {
+									          List<string> list = db.QuizSet.Select(quiz => quiz.thematic).Distinct().ToList();
+
+									           return View(list);
+									       }
+								</code>
+							</pre>
+						  
+						<p> HomeController contient la methode Index qui list les thematiques des quizs qu'on a à la base de donnée</p>
+
+						</section>
+					</script>
+				</section>
+				<section>
+					<h2>AJAX</h2>
+					<p>La force de notre application consiste à utiiser AJAX et JQuery pour dynamiser les pages Webs </p>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Test Page
+						<img src="test.png" height="300" alt="">
+						<p> On a utilisé AJAX requests pour le chargement de chaque question toute seule à chaque fois que l'utilisateur passe à la question suivante pour minimiser le temps de réponse</p>
+			
+						</section>
+					</script>
+				</section>
+				
+				<section data-markdown>
+					<script type="text/template">
+						## QuizHandler.js
+						<br>
+						<section >
+							<pre>
+								<code>
+									$(document).ready(function (){
+									    //get list of divs
+									    var elements = $("#quiz .element-animation1").toArray();
+
+									    //randomly print them back out.
+									    while (elements.length > 0) {
+									        var idx = Math.floor((Math.random() * (elements.length - 1)));
+									        var element = elements.splice(idx, 1);
+									        $('#quiz').append(element[0]);
+									    }
+									    var loading = $('#loadbar').hide();
+									    $(document)
+									    .ajaxStart(function () {
+									        loading.show();
+									    }).ajaxStop(function () {
+									    	loading.hide();
+									    });
+									    
+									    $(document).on('click','label.btn' ,function () {
+									       
+									        
+									        
+									        var newScore = parseInt($('#score').val()) + parseInt($(this).find('input:radio').val()); 
+									        $('#score').val(newScore);
+									        $('#step').val(function (i, oldVal) {
+									            return ++oldVal;
+									        });
+									        var data = $('#formQuiz').serialize();
+									        console.log(JSON.stringify(data));
+									        $.ajax({
+									            type: "POST",
+									            url: "/Quiz/getQuestion",
+									            data: data,
+									            success: function (d) {
+									                $('#quiz').empty();
+									                $('#quiz').append(d);
+									                $('h3').html($('#question').val());
+									                var elements = $("#quiz .element-animation1").toArray();
+
+									                //randomly print them back out.
+									                while (elements.length > 0) {
+									                    var idx = Math.floor((Math.random() * (elements.length - 1)));
+									                    var element = elements.splice(idx, 1);
+									                    $('#quiz').append(element[0]);
+									                }
+									            },
+									            error: function (textStatus, errorThrown) {
+									                var markExact = ($('#score').val() * 20) / $('#step').val();
+									                var mark = markExact.toFixed(2);
+									                
+									                if (markExact >= 18) {
+									                    $('#mark-success').html(mark + '/ 20');
+									                    $('#modal-success').modal('show');
+									                }
+									                else if (markExact > 12   && markExact < 18) {
+									                    $('#mark-info').html(mark + '/ 20');
+									                    $('#modal-info').modal('show');
+									                }
+
+									                else if (markExact > 8  && markExact < 12) {
+									                   
+									                    $('#mark-warning').html(mark + '/ 20');
+									                    $('#modal-warning').modal('show');
+									                }
+									                   
+									                else {
+									                    alert(markExact);
+									                    $('#mark-danger').html(mark + '/ 20');
+									                    $('#modal-danger').modal('show');
+									                }
+									                  
+									                
+									                
+									            }
+									        });
+									    });
+									    $(".modal").each(function () {
+									        $(this).on("hide.bs.modal", function () {
+									            // put your default event here
+									            window.location.href = "../../../";
+									        });
+									       
+									    });
+								</code>
+							</pre>
+						  
+						<p> AJAX + Calcul de score et d'autre fonctions et events qui interagissent lors du passage du test </p>
+
+						</section>
+					</script>
+				</section>
+				<section>
+					<h2> Perspectives du projet </h2>
+					<p> La suite du projet consiste à mettre une application pour la gestion du quiz pour multiutilisateur. C'est à dire qu'un test peut être passé par deux joueurs en temps reel en utilisant une base de donnée Redis (NoSql) et utilisé la connexion client/serveur avec sockets pour la gestion du temps réel. </p>
+				</section>
+
+				
+
 			</div>
+
 		</div>
 
 		<script src="lib/js/head.min.js"></script>
 		<script src="js/reveal.js"></script>
 
 		<script>
-			// More info about config & dependencies:
-			// - https://github.com/hakimel/reveal.js#configuration
-			// - https://github.com/hakimel/reveal.js#dependencies
+
+			// More info https://github.com/hakimel/reveal.js#configuration
 			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
 				dependencies: [
-					{ src: 'plugin/markdown/marked.js' },
-					{ src: 'plugin/markdown/markdown.js' },
-					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
 				]
 			});
+
 		</script>
+
 	</body>
 </html>
